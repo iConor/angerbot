@@ -20,6 +20,10 @@ int redPWM;
 
 PFont font;
 
+int sliderSegmentDimensionLong = 50;
+int sliderSegmentDimensionShort = 12;
+int sliderSegmentPositionScaling = 20;
+
 void setup()
 {
 //  initializeSerialPort();
@@ -56,8 +60,8 @@ void transmitCommands() // Send sync, check and motor control bytes.
 void displayStatus() // Put the control status on the screen.
 {  
 //  println( " |  Throttle: " + throttlePosition + "  |  Steering: " + steeringPosition + "  | " ); // Print status.
-  background( #ffffff );
   displayText();
+  displayBackground();
   displayBoxes();
 }
 void receiveConfirmation() // Wait for a response and/or 'freeze' if there is an error.
@@ -92,55 +96,66 @@ void initializeController() // Replace "Controller...Windows" with the name of t
 }
 void initializeDisplay()
 { 
-  size( 420, 420 );
-  font = loadFont("Consolas-16.vlw");
+  size( 800, 450 );
+  font = loadFont("Consolas-10.vlw");
   textFont( font );
-  fill( 0 );
   textAlign( CENTER, CENTER );
+  rectMode( CENTER );
+  background( #ffffff );
+}
+void displayBackground()
+{
+  stroke( #000000 );
+  fill( #ffffff );
+  rect( width / 2, height / 2, 750, 400, 10, 0, 10, 0 );
+  rect( width / 2, height / 2, 600, 400 );
+  rect( width / 2, height / 2, 750, 250 );
+  rect( width / 2, height / 2, 250, 250 );
+  rect( width / 2, height / 3, 400, 200, 10, 0, 10, 0 );
+  rect( width / 2, height - 100, 350, 100, 10, 0, 10, 0 );
+  rect( width - 700, height / 2, 100, 350, 10, 0, 10, 0 );
+  rect( width - 100, height / 2, 100, 350, 10, 0, 10, 0 );
 }
 void displayText()
 { 
-  text( "Throttle:", 60, 35 );
-  text( "Steering:", 60, 75 );
+  stroke( #000000 );
+  fill( #000000 );
   
-  if( throttlePosition > 0 )
-    text( "FWD " + throttlePosition, 70, 55 );
-  if( throttlePosition < 0 )
-    text( "REV " + abs( throttlePosition ), 70, 55 );
-  if( steeringPosition > 0)
-    text( "L " + steeringPosition, 70, 95 );
-  if( steeringPosition < 0 )
-    text( "R " + abs( steeringPosition ), 70, 95 );
+  text( "Throttle", width - 700, height - 387.5 );
+  text( "Steering", width / 2, height - 137.5 );    
+  text( "Status", width - 100, height - 387.5 );
+  text( "Video", width / 2, height - 300 );
 }
 void displayBoxes()
 {
-  if( steeringPosition >= 0 )
+  stroke( #000000 );
+  fill( #000000 );
+  
+  rect( width / 2, height - 100, sliderSegmentDimensionShort * 2, sliderSegmentDimensionLong, 10, 0, 10, 0 );
+  rect( width - 700, height / 2, sliderSegmentDimensionLong, sliderSegmentDimensionShort * 2, 10, 0, 10, 0 );
+  
+  for( int i = -7; i < 0; i++ )
   {
-    for( int i = 0; i <= steeringPosition; i++ )
-    {
-      rect( 250 - 20 * i, 50, 10, 22 + 4 * abs( i ), 10 );
-    }
-  }
-  else
-  {
-    for( int i = 0; i >= steeringPosition; i-- )
-    {
-      rect( 250 - 20 * i, 50, 10, 22 + 4 * abs( i ), 10 );
-    }
-  }
-  if( throttlePosition >= 0 )
-  {
-    for( int i = 0; i <= throttlePosition; i++ )
-    {
-      rect( 50, 250 - 20 * i, 22 + 4 * abs( i ), 10, 10 );
-    }
-  }
-  else
-  {
-    for( int i = 0; i >= throttlePosition; i-- )
-    {
-      rect( 50, 250 - 20 * i, 22 + 4 * abs( i ), 10, 10 );
-    }
+    if( throttlePosition > 0 && abs( i ) <= throttlePosition )
+      fill( #000000 );
+    else
+      fill( #ffffff );
+    rect( width - 700, height  / 2 - sliderSegmentDimensionShort / 2 - sliderSegmentPositionScaling * abs( i ), sliderSegmentDimensionLong, sliderSegmentDimensionShort, 10, 0, 10, 0 ); // FWD
+    if( throttlePosition < 0 && i >= throttlePosition )
+      fill( #000000 );
+    else
+      fill( #ffffff );
+    rect( width - 700, height  / 2 + sliderSegmentDimensionShort / 2 - sliderSegmentPositionScaling * i, sliderSegmentDimensionLong, sliderSegmentDimensionShort, 10, 0, 10, 0 ); // REV
+    if( steeringPosition > 0 && abs( i ) <= steeringPosition )
+      fill( #000000 );
+    else
+      fill( #ffffff );
+    rect( width / 2 - sliderSegmentDimensionShort / 2 - sliderSegmentPositionScaling * abs( i ), height - 100, sliderSegmentDimensionShort, sliderSegmentDimensionLong, 10, 0, 10, 0 ); // Left
+    if( steeringPosition < 0 && i >= steeringPosition )
+      fill( #000000 );
+    else
+      fill( #ffffff );
+    rect( width / 2 + sliderSegmentDimensionShort / 2 - sliderSegmentPositionScaling * i, height - 100, sliderSegmentDimensionShort, sliderSegmentDimensionLong, 10, 0, 10, 0 ); // Right
   }
 }
 
