@@ -20,46 +20,38 @@ int redPWM;
 
 void setup()
 {
-  initializeSerialPort();
   initializeController();
+  initializeDisplay();
+  initializeSerialPort();
+  
+  initializationDelay();
 }
 void draw()
 {
-  setRandomByte();
-  updateControls();
-  transmitCommands();
-  displayStatus();
-  receiveConfirmation();
+  updateController();
+  updateDisplay();
+  updateSerialPort();
 }
-void setRandomByte() // Generate random checkByte each cycle.
+
+/* CONTROLLER */
+
+void initializeController() // Replace "Controller...Windows" with the name of the device.
 {
-  checkByte = int( random( 128 ) );
+  ctrlIO = ControllIO.getInstance( this );
+  gamePad = ctrlIO.getDevice( "Controller (Xbox 360 Wireless Receiver for Windows)" );
+
+  steeringSlider = gamePad.getSlider( 3 );
+  steeringSlider.setMultiplier( -7 );
+  throttleSlider = gamePad.getSlider( 0 );
+  throttleSlider.setMultiplier( -7 );
 }
-void updateControls() // Get controller status and set motor control bytes.
+void updateController() // Get controller status and set motor control bytes.
 {
   steeringPosition = int( steeringSlider.getValue() );
   throttlePosition = int( throttleSlider.getValue() );
   
   bluePWM = position2PWM( steeringPosition );
   redPWM = position2PWM( throttlePosition );
-}
-void transmitCommands() // Send sync, check and motor control bytes.
-{
-  comPort.write( syncByte );
-  comPort.write( checkByte );
-  comPort.write( bluePWM );
-  comPort.write( redPWM );
-}
-void displayStatus() // Put the control status on the screen.
-{  
-  println( " |  Throttle: " + throttlePosition + "  |  Steering: " + steeringPosition + "  | " ); // Print status.
-}
-void receiveConfirmation() // Wait for a response and/or 'freeze' if there is an error.
-{
-  while( comPort.available() <= 0 );
-  
-  if( comPort.read() != checkByte )
-    while( true );
 }
 int position2PWM( int position ) // Convert thumbstick positions to LEGO PWM states.
 {
@@ -70,19 +62,48 @@ int position2PWM( int position ) // Convert thumbstick positions to LEGO PWM sta
   else
     return position + 16;
 }
-void initializeSerialPort() // Change the 0 in brackets to the appropriate port.
+
+/* DISPLAY */
+
+void initializeDisplay() // Print controller and serial port info to the console.
+{
+  ctrlIO.printDevices();
+  gamePad.printButtons();
+  gamePad.printSliders();
+  println( Serial.list() );
+}
+void updateDisplay() // Put the control status on the screen.
+{  
+  println( " |  Throttle: " + throttlePosition + "  |  Steering: " + steeringPosition + "  | " );
+}
+
+/* SERIAL PORT */
+
+void initializeSerialPort() // Change the "0" in brackets to the appropriate port.
 {
   comPort = new Serial( this, Serial.list()[0], 9600 );
 }
-void initializeController() // Replace "Controller...Windows" with the name of the device.
+void updateSerialPort() // Send LEGO PWM states and validate the serial connection.
 {
-  ctrlIO = ControllIO.getInstance( this );
-  gamePad = ctrlIO.getDevice( "Controller (Xbox 360 Wireless Receiver for Windows)" );
+  checkByte = int( random( 128 ) );
+  
+  comPort.write( syncByte );
+  comPort.write( checkByte );
+  comPort.write( bluePWM );
+  comPort.write( redPWM );
+  
+  while( comPort.available() <= 0 );
+  
+  if( comPort.read() != checkByte )
+    while( true );
+}
 
-  steeringSlider = gamePad.getSlider( 3 );
-  steeringSlider.setMultiplier( -7 );
-  throttleSlider = gamePad.getSlider( 0 );
-  throttleSlider.setMultiplier( -7 );
+/* MISCELLANEOUS */
+
+void initializationDelay() // This startup pause prevents the first validation from failing.
+{
+  int waitUntil = 2000 + millis();
+  while ( waitUntil > millis () );
 }
 
 
