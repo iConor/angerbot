@@ -22,7 +22,6 @@ void loop()
       bluePWM = Serial.read();
       redPWM = Serial.read();
       irSend.ComboPWM( bluePWM, redPWM, CH1 );
-      delay( 30 );
       Serial.write( checkByte );
     }
   }
