@@ -26,64 +26,17 @@ int sliderSegmentPositionScaling = 20;
 
 void setup()
 {
-//  initializeSerialPort();
   initializeController();
   initializeDisplay();
 }
 void draw()
 {
-//  setRandomByte();
-  updateControls();
-//  transmitCommands();
-  displayStatus();
-//  receiveConfirmation();
+  updateController();
+  updateDisplay();
 }
-void setRandomByte() // Generate random checkByte each cycle.
-{
-  checkByte = int( random( 128 ) );
-}
-void updateControls() // Get controller status and set motor control bytes.
-{
-  steeringPosition = int( steeringSlider.getValue() );
-  throttlePosition = int( throttleSlider.getValue() );
-  
-  bluePWM = position2PWM( steeringPosition );
-  redPWM = position2PWM( throttlePosition );
-}
-void transmitCommands() // Send sync, check and motor control bytes.
-{
-  comPort.write( syncByte );
-  comPort.write( checkByte );
-  comPort.write( bluePWM );
-  comPort.write( redPWM );
-}
-void displayStatus() // Put the control status on the screen.
-{  
-//  println( " |  Throttle: " + throttlePosition + "  |  Steering: " + steeringPosition + "  | " ); // Print status.
-  displayText();
-  displayBackground();
-  displayBoxes();
-}
-void receiveConfirmation() // Wait for a response and/or 'freeze' if there is an error.
-{
-  while( comPort.available() <= 0 );
-  
-  if( comPort.read() != checkByte )
-    while( true );
-}
-int position2PWM( int position ) // Convert thumbstick positions to LEGO PWM states.
-{
-  if ( position == 0 )
-    return 8;
-  else if ( position > 0 )
-    return position;
-  else
-    return position + 16;
-}
-void initializeSerialPort() // Change the 0 in brackets to the appropriate port.
-{
-  comPort = new Serial( this, Serial.list()[0], 9600 );
-}
+
+/* CONTROLLER */
+
 void initializeController() // Replace "Controller...Windows" with the name of the device.
 {
   ctrlIO = ControllIO.getInstance( this );
@@ -94,6 +47,26 @@ void initializeController() // Replace "Controller...Windows" with the name of t
   throttleSlider = gamePad.getSlider( 0 );
   throttleSlider.setMultiplier( -7 );
 }
+void updateController() // Get controller status and set motor control bytes.
+{
+  steeringPosition = int( steeringSlider.getValue() );
+  throttlePosition = int( throttleSlider.getValue() );
+  
+  bluePWM = position2PWM( steeringPosition );
+  redPWM = position2PWM( throttlePosition );
+}
+int position2PWM( int position ) // Convert thumbstick positions to LEGO PWM states.
+{
+  if ( position == 0 )
+    return 8;
+  else if ( position > 0 )
+    return position;
+  else
+    return position + 16;
+}
+
+/* DISPLAY */
+
 void initializeDisplay()
 { 
   size( 800, 450 );
@@ -101,12 +74,21 @@ void initializeDisplay()
   textFont( font );
   textAlign( CENTER, CENTER );
   rectMode( CENTER );
-  background( #ffffff );
+}
+void updateDisplay() // Put the control status on the screen.
+{  
+//  println( " |  Throttle: " + throttlePosition + "  |  Steering: " + steeringPosition + "  | " ); // Print status.
+  displayBackground();
+  displayBoxes();
+  displayText();
 }
 void displayBackground()
 {
+  background( #ffffff );
+  
   stroke( #000000 );
   fill( #ffffff );
+  
   rect( width / 2, height / 2, 750, 400, 10, 0, 10, 0 );
   rect( width / 2, height / 2, 600, 400 );
   rect( width / 2, height / 2, 750, 250 );
@@ -115,16 +97,6 @@ void displayBackground()
   rect( width / 2, height - 100, 350, 100, 10, 0, 10, 0 );
   rect( width - 700, height / 2, 100, 350, 10, 0, 10, 0 );
   rect( width - 100, height / 2, 100, 350, 10, 0, 10, 0 );
-}
-void displayText()
-{ 
-  stroke( #000000 );
-  fill( #000000 );
-  
-  text( "Throttle", width - 700, height - 387.5 );
-  text( "Steering", width / 2, height - 137.5 );    
-  text( "Status", width - 100, height - 387.5 );
-  text( "Video", width / 2, height - 300 );
 }
 void displayBoxes()
 {
@@ -157,6 +129,23 @@ void displayBoxes()
       fill( #ffffff );
     rect( width / 2 + sliderSegmentDimensionShort / 2 - sliderSegmentPositionScaling * i, height - 100, sliderSegmentDimensionShort, sliderSegmentDimensionLong, 10, 0, 10, 0 ); // Right
   }
+}
+void displayText()
+{ 
+  stroke( #000000 );
+  fill( #000000 );
+  
+  text( "Throttle", width - 700, height - 387.5 );
+  text( "Steering", width / 2, height - 137.5 );    
+  text( "Status", width - 100, height - 387.5 );
+  text( "Video", width / 2, height - 300 );
+}
+
+/* SERIAL PORT */
+
+void initializeSerialPort() // Change the 0 in brackets to the appropriate port.
+{
+  comPort = new Serial( this, Serial.list()[0], 9600 );
 }
 
 
