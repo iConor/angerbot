@@ -18,6 +18,11 @@ int checkByte;
 int bluePWM;
 int redPWM;
 
+int previousBluePWM;
+int previousRedPWM;
+
+int timeOut = 0;
+
 void setup()
 {
   initializeController();
@@ -85,6 +90,8 @@ void initializeSerialPort() // Change the "0" in brackets to the appropriate por
 }
 void updateSerialPort() // Send LEGO PWM states and validate the serial connection.
 {
+  if( previousBluePWM != bluePWM || previousRedPWM != redPWM || timeOut < millis() )
+  {
   checkByte = int( random( 128 ) );
   
   comPort.write( syncByte );
@@ -96,6 +103,11 @@ void updateSerialPort() // Send LEGO PWM states and validate the serial connecti
   
   if( comPort.read() != checkByte )
     while( true );
+  
+  previousBluePWM = bluePWM;
+  previousRedPWM = redPWM;
+  timeOut = 1100 + millis();
+  }
 }
 
 /* MISCELLANEOUS */
