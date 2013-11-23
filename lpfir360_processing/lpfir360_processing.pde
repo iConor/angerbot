@@ -18,6 +18,10 @@ int checkByte;
 int bluePWM;
 int redPWM;
 
+int previousBluePWM;
+int previousRedPWM;
+
+int timeOut = 0;
 PFont font;
 
 int sliderSegmentDimensionLong = 50;
@@ -28,11 +32,15 @@ void setup()
 {
   initializeController();
   initializeDisplay();
+  initializeSerialPort();
+  
+  initializationDelay();
 }
 void draw()
 {
   updateController();
   updateDisplay();
+  updateSerialPort();
 }
 
 /* CONTROLLER */
@@ -40,7 +48,8 @@ void draw()
 void initializeController() // Replace "Controller...Windows" with the name of the device.
 {
   ctrlIO = ControllIO.getInstance( this );
-  gamePad = ctrlIO.getDevice( "Controller (Xbox 360 Wireless Receiver for Windows)" );
+//  gamePad = ctrlIO.getDevice( "Controller (Xbox 360 Wireless Receiver for Windows)" );
+  gamePad = ctrlIO.getDevice( "Wireless 360 Controller" );
 
   steeringSlider = gamePad.getSlider( 3 );
   steeringSlider.setMultiplier( -7 );
@@ -67,8 +76,12 @@ int position2PWM( int position ) // Convert thumbstick positions to LEGO PWM sta
 
 /* DISPLAY */
 
-void initializeDisplay()
-{ 
+void initializeDisplay() // Print controller and serial port info to the console.
+{
+  ctrlIO.printDevices();
+  gamePad.printButtons();
+  gamePad.printSliders();
+  println( Serial.list() );
   size( 800, 450 );
   font = loadFont("Consolas-10.vlw");
   textFont( font );
@@ -140,12 +153,40 @@ void displayText()
   text( "Status", width - 100, height - 387.5 );
   text( "Video", width / 2, height - 300 );
 }
-
 /* SERIAL PORT */
 
 void initializeSerialPort() // Change the 0 in brackets to the appropriate port.
 {
-  comPort = new Serial( this, Serial.list()[0], 9600 );
+  comPort = new Serial( this, Serial.list()[4], 9600 );
+}
+void updateSerialPort() // Send LEGO PWM states and validate the serial connection.
+{
+  if( previousBluePWM != bluePWM || previousRedPWM != redPWM || timeOut < millis() )
+  {
+  checkByte = int( random( 128 ) );
+  
+  comPort.write( syncByte );
+  comPort.write( checkByte );
+  comPort.write( bluePWM );
+  comPort.write( redPWM );
+  
+  while( comPort.available() <= 0 );
+  
+  if( comPort.read() != checkByte )
+    while( true );
+  
+  previousBluePWM = bluePWM;
+  previousRedPWM = redPWM;
+  timeOut = 1100 + millis();
+  }
+}
+
+/* MISCELLANEOUS */
+
+void initializationDelay() // This startup pause prevents the first validation from failing.
+{
+  int waitUntil = 2000 + millis();
+  while ( waitUntil > millis () );
 }
 
 
