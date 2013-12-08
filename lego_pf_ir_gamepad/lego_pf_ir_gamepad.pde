@@ -1,8 +1,10 @@
+CommThread commThread = new CommThread(this);
+
 void setup()
 {
   initializeController();
   initializeDisplay();
-  initializeSerialPort();
+  commThread.start();
   
   initializationDelay();
 }
@@ -10,7 +12,6 @@ void draw()
 {
   updateController();
   updateDisplay();
-  updateSerialPort();
 }
 
 /* MISCELLANEOUS */

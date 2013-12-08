@@ -18,7 +18,7 @@ int previousRedPWM;
 void initializeController()
 {
   ctrlIO = ControllIO.getInstance( this );
-  Gamepad gamepad = new Gamepad( ctrllIO );
+  Gamepad gamepad = new Gamepad( ctrlIO );
   gamePad = ctrlIO.getDevice( gamepad.activeGamepad );
 
   steeringSlider = gamePad.getSlider( 3 );

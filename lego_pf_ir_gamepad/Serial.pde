@@ -1,34 +1,55 @@
 import processing.serial.*;
 
-Serial comPort;
+class CommThread extends Thread {
 
-int syncByte = '#';
-int checkByte;
+  PApplet parent;
+  Serial comPort;
 
-int timeOut = 0;
+  int syncByte = '#';
+  int checkByte;
 
-void initializeSerialPort() // Change the 0 in brackets to the appropriate port.
-{
-  comPort = new Serial( this, Serial.list()[4], 9600 );
-}
-void updateSerialPort() // Send LEGO PWM states and validate the serial connection.
-{
-  if( previousBluePWM != bluePWM || previousRedPWM != redPWM || timeOut < millis() )
-  {
-  checkByte = int( random( 128 ) );
-  
-  comPort.write( syncByte );
-  comPort.write( checkByte );
-  comPort.write( bluePWM );
-  comPort.write( redPWM );
-  
-  while( comPort.available() <= 0 );
-  
-  if( comPort.read() != checkByte )
-    while( true );
-  
-  previousBluePWM = bluePWM;
-  previousRedPWM = redPWM;
-  timeOut = 1100 + millis();
+  int timeOut = 0;
+
+  boolean running;
+
+  CommThread(PApplet caller) {
+    parent = caller;
+    running = false;
+  }
+
+  void start() {
+    println("Starting communications thread.");
+    running = true;
+    comPort = new Serial( parent, Serial.list()[4], 9600 );
+    super.start();
+  }
+  void run() {
+    println("Running communications thread.");
+    while (running) {
+      if ( previousBluePWM != bluePWM || previousRedPWM != redPWM || timeOut < millis() )
+      {
+        checkByte = int( random( 128 ) );
+
+        comPort.write( syncByte );
+        comPort.write( checkByte );
+        comPort.write( bluePWM );
+        comPort.write( redPWM );
+
+        while ( comPort.available () <= 0 );
+
+        if ( comPort.read() != checkByte )
+          while ( true );
+
+        previousBluePWM = bluePWM;
+        previousRedPWM = redPWM;
+        timeOut = 1100 + millis();
+      }
+    }
+  }
+  void quit() {
+    println("Quitting communications thread.");
+    running = false;
+    interrupt();
   }
 }
+
