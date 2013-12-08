@@ -15,11 +15,11 @@ int redPWM;
 int previousBluePWM;
 int previousRedPWM;
 
-void initializeController() // Replace "Controller...Windows" with the name of the device.
+void initializeController()
 {
   ctrlIO = ControllIO.getInstance( this );
-//  gamePad = ctrlIO.getDevice( "Controller (Xbox 360 Wireless Receiver for Windows)" );
-  gamePad = ctrlIO.getDevice( "Wireless 360 Controller" );
+  Gamepad gamepad = new Gamepad( ctrllIO );
+  gamePad = ctrlIO.getDevice( gamepad.activeGamepad );
 
   steeringSlider = gamePad.getSlider( 3 );
   steeringSlider.setMultiplier( -7 );
@@ -42,4 +42,31 @@ int position2PWM( int position ) // Convert thumbstick positions to LEGO PWM sta
     return position;
   else
     return position + 16;
+}
+
+public static class Gamepad {
+
+  private static final String[] gamepadName = {"PLAYSTATION(R)3 Controller", "Controller (Xbox 360 Wireless Receiver for Windows)", "Wireless 360 Controller", "AIRFLO             "};
+
+  public static String activeGamepad = "";
+
+  public Gamepad(ControllIO controllIO) {
+    
+    ControllDevice controllDevice;
+    String currentDeviceName = "";
+    
+    for (int i=0;i<controllIO.getNumberOfDevices();i++) {
+      
+      controllDevice = controllIO.getDevice(i);
+      currentDeviceName = controllDevice.getName();
+      
+      for(int j=0;j<gamepadName.length;j++){
+        
+        if(currentDeviceName.equals(gamepadName[j])){
+          activeGamepad = gamepadName[j];
+        }
+        
+      }
+    }
+  }
 }
