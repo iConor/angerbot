@@ -2,7 +2,10 @@ import processing.serial.*;
 
 Serial comPort;
 
-int syncByte = '#';
+final int BAUD_RATE = 57600;
+
+final int syncByte = '#';
+
 int checkByte;
 
 int timeOut = 0;
@@ -10,7 +13,7 @@ int timeOut = 0;
 void initializeSerialPort() // Change the 0 in brackets to the appropriate port.
 {
   SerialPort serialPort = new SerialPort();
-  comPort = new Serial( this, serialPort.name(), 9600 );
+  comPort = new Serial( this, serialPort.name(), BAUD_RATE );
 }
 void updateSerialPort() // Send LEGO PWM states and validate the serial connection.
 {
@@ -36,8 +39,11 @@ void updateSerialPort() // Send LEGO PWM states and validate the serial connecti
 
 public class SerialPort {
 
+  public final String WINDOWS= "COM";
+  public final String LINUX_MAC= "/dev/tty.usb";
+
   private final String[] KNOWN_PORTS = {
-    "COM", "/dev/tty.usbserial"
+    WINDOWS, LINUX_MAC
   };
   
   private String _name = "";
