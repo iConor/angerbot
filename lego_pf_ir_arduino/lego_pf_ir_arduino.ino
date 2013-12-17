@@ -1,16 +1,18 @@
 #include<legopowerfunctions.h>
 
-LEGOPowerFunctions irSend( 2 );
+long BAUD_RATE = 57600;
+int IR_LED_PIN = 4;
 
 int syncByte = '#';
 int checkByte;
 
-int bluePWM;
-int redPWM;
+int bluePWM, redPWM;
+
+LEGOPowerFunctions irSend( IR_LED_PIN );
 
 void setup()
 { 
-  Serial.begin( 9600 ); 
+  Serial.begin( BAUD_RATE ); 
 }
 void loop()
 {
@@ -26,5 +28,3 @@ void loop()
     }
   }
 }
-
-

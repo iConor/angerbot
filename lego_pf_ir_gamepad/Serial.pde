@@ -3,9 +3,13 @@ import processing.serial.*;
 class CommThread extends Thread {
 
   PApplet parent;
+
   Serial comPort;
 
-  int syncByte = '#';
+  final int BAUD_RATE = 57600;
+
+  final int syncByte = '#';
+
   int checkByte;
 
   int timeOut = 0;
@@ -20,9 +24,11 @@ class CommThread extends Thread {
   void start() {
     println("Starting communications thread.");
     running = true;
-    comPort = new Serial( parent, Serial.list()[4], 9600 );
+    SerialPort serialPort = new SerialPort();
+    comPort = new Serial( parent, serialPort.name(), BAUD_RATE );
     super.start();
   }
+  
   void run() {
     println("Running communications thread.");
     while (running) {
@@ -46,10 +52,43 @@ class CommThread extends Thread {
       }
     }
   }
+  
   void quit() {
     println("Quitting communications thread.");
     running = false;
     interrupt();
+  }
+}
+
+public class SerialPort {
+
+  public final String WINDOWS= "COM";
+  public final String LINUX_MAC= "/dev/tty.usb";
+
+  private final String[] KNOWN_PORTS = {
+    WINDOWS, LINUX_MAC
+  };
+
+  private String _name = "";
+
+  SerialPort() {
+    String currentPortName = "";
+
+    for (int i=0;i<Serial.list().length;i++) {
+
+      currentPortName = Serial.list()[i];
+
+      for (int j=0;j<KNOWN_PORTS.length;j++) {
+
+        if (currentPortName.indexOf(KNOWN_PORTS[j])>=0) {
+          _name = currentPortName;
+        }
+      }
+    }
+  }
+
+  public String name() {
+    return _name;
   }
 }
 
