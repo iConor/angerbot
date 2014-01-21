@@ -64,6 +64,8 @@ public class Gamepad {
 
   // Gamepad Name
   private String _name = "";
+  // Gamepad Number
+  private int _number = -1;
 
   //-------------------- Buttons/Sliders --------------------//
 
@@ -107,25 +109,26 @@ public class Gamepad {
   // Constructor
   public Gamepad(ControllIO ctrllIO) {
     controllIO = ctrllIO;
-    getGamepadName();
+    getGamepadNameAndNumber();
     setButtonsAndSliders();
   }
 
-  // Get Gamepad Name
-  private void getGamepadName() {
+  // Get Gamepad Name and Number
+  private void getGamepadNameAndNumber() {
 
     ControllDevice controllDevice;
     String currentDevice = "";
 
-    for (int i=0;i<controllIO.getNumberOfDevices();i++) {
+    for ( int i = 0; i < controllIO.getNumberOfDevices(); i++ ) {
 
       controllDevice = controllIO.getDevice(i);
       currentDevice = controllDevice.getName();
 
-      for (int j=0;j<KNOWN_GAMEPADS.length;j++) {
+      for ( int j = 0; j < KNOWN_GAMEPADS.length; j++ ) {
 
-        if (currentDevice.equals(KNOWN_GAMEPADS[j])) {
+        if ( currentDevice.equals( KNOWN_GAMEPADS[j] ) ) {
           _name = KNOWN_GAMEPADS[j];
+          _number = i;
         }
       }
     }
@@ -317,10 +320,13 @@ public class Gamepad {
     return _rightTrigger;
   }
 
-  //-------------------- Name Getter --------------------//
+  //-------------------- Name And Number Getter --------------------//
 
   public String name() {
     return _name;
+  }
+  public int number() {
+    return _number;
   }
 }
 
