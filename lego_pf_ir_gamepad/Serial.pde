@@ -11,8 +11,8 @@ class SerialThread extends Thread {
   SerialThread(PApplet pApplet) {
     print("Creating communications thread.");
     running = false;
-    SerialPort serialPort = new SerialPort();
-    serial = new Serial( pApplet, serialPort.name(), BAUD_RATE );
+    AutoSerial autoSerial = new AutoSerial();
+    serial = new Serial( pApplet, autoSerial.name(), BAUD_RATE );
     println("   Done.");
   }
 
@@ -56,35 +56,57 @@ class SerialThread extends Thread {
   }
 }
 
-public class SerialPort {
+public class AutoSerial {
 
-  public final String WINDOWS= "COM";
-  public final String LINUX_MAC= "/dev/tty.usb";
+  //-------------------- Serial Port Names --------------------//
 
+  // Known Serial Port Prefixes
+  private final String WINDOWS= "COM";
+  private final String MAC= "/dev/tty.usb";
+
+  // List of Known Prefixes
   private final String[] KNOWN_PORTS = {
-    WINDOWS, LINUX_MAC
+    WINDOWS, MAC
   };
 
+  // Serial Port Name
   private String _name = "";
+  // Serial Port Number
+  private int _number = -1;
 
-  SerialPort() {
+  //-------------------- Autodetection Routine --------------------//
+
+  // Constructor
+  public AutoSerial() {
+    getSerialPortNameAndNumber();
+  }
+
+  // Get Serial Port Name and Number
+  private void getSerialPortNameAndNumber() {
+
     String currentPortName = "";
 
-    for (int i=0;i<Serial.list().length;i++) {
+    for ( int i=0; i < Serial.list().length; i++ ) {
 
       currentPortName = Serial.list()[i];
 
-      for (int j=0;j<KNOWN_PORTS.length;j++) {
+      for ( int j = 0; j < KNOWN_PORTS.length; j++ ) {
 
-        if (currentPortName.indexOf(KNOWN_PORTS[j])>=0) {
+        if ( currentPortName.indexOf( KNOWN_PORTS[j] ) >= 0 ) {
           _name = currentPortName;
+          _number = i;
         }
       }
     }
   }
 
+  //-------------------- Name And Number Getters --------------------//
+
   public String name() {
     return _name;
+  }
+  public int number() {
+    return _number;
   }
 }
 
