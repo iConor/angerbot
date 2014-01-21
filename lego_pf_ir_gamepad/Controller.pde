@@ -1,5 +1,3 @@
-import procontroll.*;
-
 ControllIO ctrlIO;
 
 ControllDevice gamePad;
@@ -28,6 +26,7 @@ void initializeController()
 }
 void updateController() // Get controller status and set motor control bytes.
 {
+  // println("Updating controller.");
   steeringPosition = int( steeringSlider.getValue() );
   throttlePosition = int( throttleSlider.getValue() );
 

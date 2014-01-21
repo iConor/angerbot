@@ -6,10 +6,10 @@ int sliderSegmentPositionScaling = 20;
 
 void initializeDisplay() // Print controller and serial port info to the console.
 {
-  ctrlIO.printDevices();
-  gamePad.printButtons();
-  gamePad.printSliders();
-  println( Serial.list() );
+  //ctrlIO.printDevices();
+  //gamePad.printButtons();
+  //gamePad.printSliders();
+  //println( Serial.list() );
   size( 800, 450 );
   font = loadFont("Consolas-10.vlw");
   textFont( font );

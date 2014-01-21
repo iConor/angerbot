@@ -1,12 +1,19 @@
-CommThread commThread = new CommThread(this);
+import processing.serial.*;
+
+import procontroll.*;
+import net.java.games.input.*;
+
+SerialThread serialThread;
 
 void setup()
 {
+  serialThread = new SerialThread(this);
+  
   initializeController();
   initializeDisplay();
   
   initializationDelay();
-  commThread.start();
+  serialThread.start();
 }
 void draw()
 {

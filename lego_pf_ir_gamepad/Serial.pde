@@ -1,60 +1,58 @@
-import processing.serial.*;
+class SerialThread extends Thread {
 
-class CommThread extends Thread {
+  private final int BAUD_RATE = 57600;
+  private final int syncByte = '#';
 
-  PApplet parent;
+  private boolean running;
+  private int checkByte;
+  private int timeOut;
+  private Serial serial;
 
-  Serial comPort;
-
-  final int BAUD_RATE = 57600;
-
-  final int syncByte = '#';
-
-  int checkByte;
-
-  int timeOut = 0;
-
-  boolean running;
-
-  CommThread(PApplet caller) {
-    parent = caller;
+  SerialThread(PApplet pApplet) {
+    print("Creating communications thread.");
     running = false;
     SerialPort serialPort = new SerialPort();
-    comPort = new Serial( parent, serialPort.name(), BAUD_RATE );
+    serial = new Serial( pApplet, serialPort.name(), BAUD_RATE );
+    println("   Done.");
   }
 
-  void start() {
-    println("Starting communications thread.");
+  public void start() {
+    print("Starting communications thread.");
     running = true;
     super.start();
+    timeOut = 0;
+    println("   Done.");
   }
-  
-  void run() {
+
+  public void run() {
     println("Running communications thread.");
     while (running) {
       if ( previousBluePWM != bluePWM || previousRedPWM != redPWM || timeOut < millis() )
       {
+        // println("Cycling communications.");
+        
         checkByte = int( random( 128 ) );
 
-        comPort.write( syncByte );
-        comPort.write( checkByte );
-        comPort.write( bluePWM );
-        comPort.write( redPWM );
+        serial.write( syncByte );
+        serial.write( checkByte );
+        serial.write( bluePWM );
+        serial.write( redPWM );
 
-        while ( comPort.available () <= 0 );
+        while ( serial.available () <= 0 );
 
-        if ( comPort.read() != checkByte )
+        if ( serial.read() != checkByte )
           while ( true );
-          
+
         timeOut = 1100 + millis();
       }
     }
   }
-  
-  void quit() {
-    println("Quitting communications thread.");
+
+  public void quit() {
+    print("Quitting communications thread.");
     running = false;
-    interrupt();
+    serial.stop();
+    println("   Done.");
   }
 }
 
