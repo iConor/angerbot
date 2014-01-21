@@ -4,9 +4,9 @@ void setup()
 {
   initializeController();
   initializeDisplay();
-  commThread.start();
   
   initializationDelay();
+  commThread.start();
 }
 void draw()
 {

@@ -30,7 +30,10 @@ void updateController() // Get controller status and set motor control bytes.
 {
   steeringPosition = int( steeringSlider.getValue() );
   throttlePosition = int( throttleSlider.getValue() );
-  
+
+  previousBluePWM = bluePWM;
+  previousRedPWM = redPWM;
+
   bluePWM = position2PWM( steeringPosition );
   redPWM = position2PWM( throttlePosition );
 }

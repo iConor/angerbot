@@ -19,13 +19,13 @@ class CommThread extends Thread {
   CommThread(PApplet caller) {
     parent = caller;
     running = false;
+    SerialPort serialPort = new SerialPort();
+    comPort = new Serial( parent, serialPort.name(), BAUD_RATE );
   }
 
   void start() {
     println("Starting communications thread.");
     running = true;
-    SerialPort serialPort = new SerialPort();
-    comPort = new Serial( parent, serialPort.name(), BAUD_RATE );
     super.start();
   }
   
@@ -45,9 +45,7 @@ class CommThread extends Thread {
 
         if ( comPort.read() != checkByte )
           while ( true );
-
-        previousBluePWM = bluePWM;
-        previousRedPWM = redPWM;
+          
         timeOut = 1100 + millis();
       }
     }
