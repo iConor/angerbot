@@ -4,7 +4,7 @@ class SerialThread extends Thread {
   private final int syncByte = '#';
 
   private boolean running;
-  private int checkByte;
+  private int checkByte = 0;
   private int timeOut;
   private Serial serial;
 
@@ -22,29 +22,17 @@ class SerialThread extends Thread {
     super.start();
     timeOut = 0;
     println("   Done.");
+
+    // Start serial handshaking.
+    serial.write( syncByte );
+    serial.write( checkByte );
+    serial.write( bluePWM );
+    serial.write( redPWM );
   }
 
   public void run() {
     println("Running communications thread.");
     while (running) {
-      if ( previousBluePWM != bluePWM || previousRedPWM != redPWM || timeOut < millis() )
-      {
-        // println("Cycling communications.");
-        
-        checkByte = int( random( 128 ) );
-
-        serial.write( syncByte );
-        serial.write( checkByte );
-        serial.write( bluePWM );
-        serial.write( redPWM );
-
-        while ( serial.available () <= 0 );
-
-        if ( serial.read() != checkByte )
-          while ( true );
-
-        timeOut = 1100 + millis();
-      }
     }
   }
 
@@ -53,6 +41,19 @@ class SerialThread extends Thread {
     running = false;
     serial.stop();
     println("   Done.");
+  }
+
+  public void event() {
+
+    if ( serial.read() != checkByte )
+      while ( true );
+
+    checkByte = int( random( 128 ) );
+
+    serial.write( syncByte );
+    serial.write( checkByte );
+    serial.write( bluePWM );
+    serial.write( redPWM );
   }
 }
 
@@ -108,5 +109,9 @@ public class AutoSerial {
   public int number() {
     return _number;
   }
+}
+
+void serialEvent(Serial p) { 
+  serialThread.event();
 }
 
