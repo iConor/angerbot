@@ -5,8 +5,8 @@ const int IR_LED_PIN = 4;
 const int syncByte = '#';
 
 int checkByte;
-int bluePWM; // Output A
-int redPWM; // Output B
+int bluePWM; // Output B
+int redPWM; // Output A
 
 // Tell the LEGO Power Functions library which pin to use.
 LEGOPowerFunctions irSend( IR_LED_PIN );
