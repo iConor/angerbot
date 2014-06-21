@@ -1,13 +1,9 @@
-import procontroll.*;
+import gamepadd.*;
 import processing.serial.*;
 
 /* Controller Stuff */
 
-ControllIO ctrlIO;
-
-ControllDevice gamePad;
-ControllSlider steeringSlider;
-ControllSlider throttleSlider;
+Gamepadd gamepad;
 
 int steeringPosition;
 int throttlePosition;
@@ -30,16 +26,8 @@ int checkByte;
 
 void setup() {
 
-  // Start proCONTROLL.
-  ctrlIO = ControllIO.getInstance( this );
-  // Tell proCONTROLL which controller to use.
-  gamePad = ctrlIO.getDevice( "Controller (Xbox 360 Wireless Receiver for Windows)" );
-  // Tell proCONTROLL which sliders to use.
-  steeringSlider = gamePad.getSlider( 3 );  // Right stick, horizontal axis.
-  throttleSlider = gamePad.getSlider( 0 );  // Left stick, vertical axis.
-  // Make each slider return a more convenient value for the LEGO protocol.
-  steeringSlider.setMultiplier( -7 );
-  throttleSlider.setMultiplier( -7 );
+  // Setup a video game controller.
+  gamepad = new Gamepadd( this, 7, 0.1 );
 
   // Print a numbered list of available serial ports.
   println("Serial Ports:");
@@ -48,7 +36,7 @@ void setup() {
   }
   
   // Change the 0 inside brackets to match the desired port number.
-  myPort = new Serial( this, Serial.list()[0], BAUD_RATE );
+  myPort = new Serial( this, Serial.list()[5], BAUD_RATE );
 
   // Wait two seconds so the serial port doesn't lock up.
   int waitUntil = 2000 + millis();
@@ -58,8 +46,8 @@ void setup() {
 void draw() {
 
   // Get slider values and set desired PWM states.
-  bluePWM = slider2PWM( int( steeringSlider.getValue() ) );
-  redPWM = slider2PWM( int( throttleSlider.getValue() ) );
+  bluePWM = slider2PWM( int( -gamepad.getRightHorizontal() ) );
+  redPWM = slider2PWM( int( gamepad.getLeftVertical() ) );
 
   // Only transmit when the controller changes or the LEGO timeout is almost up.
   if ( previousBluePWM != bluePWM || previousRedPWM != redPWM || timeOut < millis() ) {
