@@ -2,33 +2,44 @@
 
 const long BAUD_RATE = 9600;
 const int IR_LED_PIN = 4;
-const int syncByte = '#';
+const int red = 16;
 
-int checkByte;
-int bluePWM; // Output B
-int redPWM; // Output A
+int bluePWM;
+int redPWM;
 
-// Tell the LEGO Power Functions library which pin to use.
+int previousBluePWM = 0;
+int previousRedPWM = 0;
+
+int timeOut = 0;
+
 LEGOPowerFunctions irSend( IR_LED_PIN );
 
 void setup() {
-  // Start the serial port.
   Serial.begin( BAUD_RATE ); 
 }
 
 void loop() {
-  // Wait for Processing to send a whole packet.
-  if( Serial.available() >= 4 ) {
-    // Read the packet starting at the syncByte.
-    if( Serial.read() == syncByte ) {
-      // Read the packet's contents into memory.
-      checkByte = Serial.read();
-      bluePWM = Serial.read();
-      redPWM = Serial.read();
-      // Transmit the PWM steps to the LEGO Power Functions receiver.
-      irSend.ComboPWM( bluePWM, redPWM, CH1 );
-      // Send the checkByte back to Processing for validation.
-      Serial.write( checkByte );
-    }
+
+  if( bluePWM != previousBluePWM || redPWM != previousRedPWM || timeOut < millis() ) {
+
+    irSend.ComboPWM( bluePWM, redPWM, CH1 );
+    timeOut = 1100 + millis();
+
+    previousBluePWM = bluePWM;
+    previousRedPWM = redPWM;
   }
+
+  if( Serial.available() > 0) {
+    int received = Serial.read();
+    Serial.write( received );
+    if( received < red ) {
+      bluePWM = received;
+    }
+    else {
+      redPWM = received - red;
+    }
+  }  
 }
+
+
+
